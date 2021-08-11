@@ -40,12 +40,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionHelp.triggered.connect(self.app_help)
 
     def open_file(self):
+        _file_path = self.file_path
         self.file_path = QtWidgets.QFileDialog.getOpenFileName(self, "Project Data", "",
                                                                "Image files(*.png *.jpg *.jpeg *.bmp)")
         if all(self.file_path):
             print(self.file_path[0])
             self.load_image(self.file_path[0])
         else:
+            self.file_path = _file_path
             QtWidgets.QMessageBox().critical(self, "Error", "File was not opened or does not exist.",
                                              QtWidgets.QMessageBox().Ok)
 
@@ -54,11 +56,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.label.setPixmap(pixmap.scaled(781, 501))
 
     def save_image(self):
+        _file_path = self.file_path
         if self.file_path:
             print(self.file_path)
             options = QtWidgets.QFileDialog.Options()
             # options |= QtWidgets.QFileDialog.DontUseNativeDialog
-            file_name, _ = QtWidgets.QFileDialog.getSaveFileName(self, "SaveFileName", "./src",
+            file_name, _ = QtWidgets.QFileDialog.getSaveFileName(self, "SaveFileName", "",
                                                                  "Image files(*.png)",
                                                                  options=options)
             if file_name:
@@ -66,11 +69,15 @@ class MainWindow(QtWidgets.QMainWindow):
                     from PIL import Image
                     open_file_from_pil = Image.open(f"{self.file_path[0]}")
                     open_file_from_pil_copy = open_file_from_pil.resize((16, 16))
-                    open_file_from_pil_copy.save(f"./src/{file_name}_16x16.png")
+                    open_file_from_pil_copy.save(f"{file_name}_16x16.png")
                 except Exception as _error:
                     QtWidgets.QMessageBox().critical(self, "Error", f"{_error}",
                                                      QtWidgets.QMessageBox().Ok)
+            else:
+                QtWidgets.QMessageBox().critical(self, "Error", "Error while saving file, canceled.",
+                                                 QtWidgets.QMessageBox().Ok)
         else:
+            self.file_path = _file_path
             QtWidgets.QMessageBox().critical(self, "Error", "File was not opened or does not exist.",
                                              QtWidgets.QMessageBox().Ok)
 
@@ -83,7 +90,6 @@ Icons taken from https://www.flaticon.com/
     def app_help(self):
         _text_help = r"""To convert an image to an icon size, you need to open this image, and then save this image.
 When you saving image, don't to set the file extension, it will always be *.png.
-By default, images are saved in the ./src folder, don't delete it.
 """
         QtWidgets.QMessageBox().about(self, "About this application", _text_help)
 
